@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
+  ScrollView,
   View,
   Text,
   StyleSheet,
@@ -29,18 +30,15 @@ export default function App() {
   // --------------------
   // Axios / API test logic
   // --------------------
-  // State for API response, loading state, or error
   const [apiData, setApiData] = useState<{ title: string; body: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorText, setErrorText] = useState<string | null>(null);
 
-  // Function that fetches a sample post from JSONPlaceholder
   const fetchOnlineData = async () => {
     setLoading(true);
     setErrorText(null);
     try {
       const response = await axios.get('https://jsonplaceholder.typicode.com/posts/1');
-      // We expect an object like { userId, id, title, body }
       setApiData({ title: response.data.title, body: response.data.body });
     } catch (err) {
       console.error('API error:', err);
@@ -50,41 +48,59 @@ export default function App() {
     }
   };
 
-  // Run fetchOnlineData once when component mounts
   useEffect(() => {
     fetchOnlineData();
   }, []);
 
+  // --------------------
+  // Current Date/Time logic
+  // --------------------
+  const [currentTime, setCurrentTime] = useState(new Date().toLocaleString());
+  const refreshTime = () => {
+    setCurrentTime(new Date().toLocaleString());
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* -------------------- */}
-      {/* Message-of-the-Day Card */}
-      {/* -------------------- */}
-      <View style={styles.card}>
-        <Text style={styles.title}>Message of the Day</Text>
-        <Text style={styles.message}>{todayMsg}</Text>
-        <Button title="New Message" onPress={refreshMessage} />
-      </View>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {/* -------------------- */}
+        {/* Message‐of‐the‐Day Card */}
+        {/* -------------------- */}
+        <View style={styles.card}>
+          <Text style={styles.title}>Message of the Day</Text>
+          <Text style={styles.message}>{todayMsg}</Text>
+          <Button title="New Message" onPress={refreshMessage} />
+        </View>
 
-      {/* -------------------- */}
-      {/* API Test Card */}
-      {/* -------------------- */}
-      <View style={styles.card}>
-        <Text style={styles.title}>API Test</Text>
+        {/* -------------------- */}
+        {/* API Test Card */}
+        {/* -------------------- */}
+        <View style={styles.card}>
+          <Text style={styles.title}>API Test</Text>
 
-        {loading && <ActivityIndicator size="large" color="#0000ff" />}
+          {loading && <ActivityIndicator size="large" color="#0000ff" />}
 
-        {!loading && apiData && (
-          <>
-            <Text style={styles.apiTitle}>{apiData.title}</Text>
-            <Text style={styles.apiBody}>{apiData.body}</Text>
-          </>
-        )}
+          {!loading && apiData && (
+            <>
+              <Text style={styles.apiTitle}>{apiData.title}</Text>
+              <Text style={styles.apiBody}>{apiData.body}</Text>
+            </>
+          )}
 
-        {!loading && errorText && <Text style={styles.error}>{errorText}</Text>}
+          {!loading && errorText && <Text style={styles.error}>{errorText}</Text>}
 
-        <Button title="Reload API" onPress={fetchOnlineData} />
-      </View>
+          <Button title="Reload API" onPress={fetchOnlineData} />
+        </View>
+
+        {/* -------------------- */}
+        {/* Current Date/Time Card */}
+        {/* -------------------- */}
+        <View style={styles.card}>
+          <Text style={styles.title}>Current Date & Time</Text>
+          <Text style={styles.message}>{currentTime}</Text>
+          <Button title="Refresh Time" onPress={refreshTime} />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -92,8 +108,10 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: '#f0f4f7',
+  },
+  scrollContainer: {
+    padding: 16,
     justifyContent: 'center',
   },
   card: {
