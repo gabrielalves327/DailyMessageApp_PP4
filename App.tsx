@@ -20,6 +20,7 @@ export default function App() {
   const [customMessage, setCustomMessage] = useState('');
   const [savedCustomMessage, setSavedCustomMessage] = useState('');
   const [streak, setStreak] = useState(0);
+  const [daysSinceStart, setDaysSinceStart] = useState(0);
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -45,6 +46,26 @@ export default function App() {
       }
     };
     loadData();
+  }, []);
+
+  useEffect(() => {
+    const checkFirstOpen = async () => {
+      try {
+        const firstDate = await AsyncStorage.getItem('firstOpenDate');
+        const today = new Date();
+        if (!firstDate) {
+          await AsyncStorage.setItem('firstOpenDate', today.toDateString());
+          setDaysSinceStart(1);
+        } else {
+          const diff =
+            (today.getTime() - new Date(firstDate).getTime()) / (1000 * 60 * 60 * 24);
+          setDaysSinceStart(Math.floor(diff) + 1);
+        }
+      } catch (e) {
+        console.error('Error calculating days since start:', e);
+      }
+    };
+    checkFirstOpen();
   }, []);
 
   const refreshMessage = async () => {
@@ -160,6 +181,12 @@ export default function App() {
           <Text style={styles.message}>{currentTime}</Text>
           <Button title="Refresh Time" onPress={refreshTime} />
         </View>
+
+        <View style={styles.card}>
+          <Text style={styles.title}>You've Had This App For</Text>
+          <Text style={styles.message}>{daysSinceStart} day(s)</Text>
+        </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -169,7 +196,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f0f4f7' },
   scrollContainer: { padding: 16, justifyContent: 'center' },
   card: {
-    padding: 20,
+    padding: 21,
     marginVertical: 8,
     backgroundColor: '#fff',
     borderRadius: 10,
